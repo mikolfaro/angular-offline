@@ -1,5 +1,6 @@
 angular.module('angularOffline', [
   'ngRoute'
+  'angularOffline.templates'
   'angularOffline.todo'
 ])
 .config ($routeProvider) ->
@@ -10,4 +11,3 @@ angular.module('angularOffline', [
       templateUrl: '/angular-offline/todo/todo.html'
     .otherwise
       redirectTo: '/todo'
-

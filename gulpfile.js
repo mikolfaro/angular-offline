@@ -11,6 +11,7 @@ var gulp = require('gulp'),
     lazypipe = require('lazypipe'),
     stylish = require('jshint-stylish'),
     bower = require('./bower'),
+    manifest = require('gulp-manifest'),
     isWatching = false;
 
 var htmlminOpts = {
@@ -154,6 +155,22 @@ gulp.task('statics', g.serve({
 }));
 
 /**
+ * Cache
+ */
+gulp.task('manifest', function () {
+  gulp.src(['.tmp/**'])
+    .pipe(manifest({
+      hash: true,
+      preferOnline: true,
+      network: ['*'],
+      filename: 'app.manifest',
+      basePath: '.tmp',
+      exclude: 'app.manifest'
+    }))
+    .pipe(gulp.dest('.tmp'));
+});
+
+/**
  * Watch
  */
 gulp.task('serve', ['watch']);
@@ -266,7 +283,7 @@ function templateFiles (opt) {
 function buildTemplates () {
   return lazypipe()
     .pipe(g.ngHtml2js, {
-      moduleName: bower.name,
+      moduleName: 'angularOffline.templates',
       prefix: '/' + bower.name + '/',
       stripPrefix: '/src/app'
     })
