@@ -11,6 +11,7 @@ var gulp = require('gulp'),
     lazypipe = require('lazypipe'),
     stylish = require('jshint-stylish'),
     bower = require('./bower'),
+    manifest = require('gulp-manifest'),
     isWatching = false;
 
 var htmlminOpts = {
@@ -110,6 +111,34 @@ gulp.task('vendors', function () {
 });
 
 /**
+ * Cache
+ */
+gulp.task('manifest', ['build-all'], function () {
+  gulp.src(['.tmp/**'].concat(bowerFiles()))
+    .pipe(manifest({
+      hash: true,
+      preferOnline: true,
+      network: ['*'],
+      filename: 'app.manifest',
+      basePath: '(.tmp/src/app|.tmp|bower_components)',
+      exclude: 'app.manifest'
+    }))
+    .pipe(gulp.dest('.tmp'));
+});
+gulp.task('manifest-dist', ['vendors', 'assets', 'styles-dist', 'scripts-dist'], function () {
+  gulp.src(['./dist/**'])
+    .pipe(manifest({
+      hash: true,
+      preferOnline: true,
+      network: ['*'],
+      filename: 'app.manifest',
+      basePath: 'dist',
+      exclude: 'app.manifest'
+    }))
+    .pipe(gulp.dest('./dist'));
+});
+
+/**
  * Index
  */
 gulp.task('index', index);
@@ -137,7 +166,7 @@ gulp.task('assets', function () {
 /**
  * Dist
  */
-gulp.task('dist', ['vendors', 'assets', 'styles-dist', 'scripts-dist'], function () {
+gulp.task('dist', ['vendors', 'assets', 'styles-dist', 'scripts-dist', 'manifest-dist'], function () {
   return gulp.src('./src/app/index.html')
     .pipe(g.inject(gulp.src('./dist/vendors.min.{js,css}'), {ignorePath: 'dist', starttag: '<!-- inject:vendor:{{ext}} -->'}))
     .pipe(g.inject(gulp.src('./dist/' + bower.name + '.min.{js,css}'), {ignorePath: 'dist'}))
@@ -183,7 +212,7 @@ gulp.task('watch', ['statics', 'default'], function () {
 /**
  * Default task
  */
-gulp.task('default', ['lint', 'build-all']);
+gulp.task('default', ['lint', 'build-all', 'manifest']);
 
 /**
  * Lint everything
@@ -266,7 +295,7 @@ function templateFiles (opt) {
 function buildTemplates () {
   return lazypipe()
     .pipe(g.ngHtml2js, {
-      moduleName: bower.name,
+      moduleName: 'angularOffline.templates',
       prefix: '/' + bower.name + '/',
       stripPrefix: '/src/app'
     })
