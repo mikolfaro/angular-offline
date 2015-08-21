@@ -120,7 +120,7 @@ gulp.task('manifest', ['build-all'], function () {
       preferOnline: true,
       network: ['*'],
       filename: 'app.manifest',
-      basePath: '(.tmp|bower_components|.tmp/src)',
+      basePath: '(.tmp/src/app|.tmp|bower_components)',
       exclude: 'app.manifest'
     }))
     .pipe(gulp.dest('.tmp'));
