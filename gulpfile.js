@@ -111,6 +111,34 @@ gulp.task('vendors', function () {
 });
 
 /**
+ * Cache
+ */
+gulp.task('manifest', ['build-all'], function () {
+  gulp.src(['.tmp/**'].concat(bowerFiles()))
+    .pipe(manifest({
+      hash: true,
+      preferOnline: true,
+      network: ['*'],
+      filename: 'app.manifest',
+      basePath: '(.tmp|bower_components|.tmp/src)',
+      exclude: 'app.manifest'
+    }))
+    .pipe(gulp.dest('.tmp'));
+});
+gulp.task('manifest-dist', ['vendors', 'assets', 'styles-dist', 'scripts-dist'], function () {
+  gulp.src(['./dist/**'])
+    .pipe(manifest({
+      hash: true,
+      preferOnline: true,
+      network: ['*'],
+      filename: 'app.manifest',
+      basePath: '.tmp',
+      exclude: 'app.manifest'
+    }))
+    .pipe(gulp.dest('./dist'));
+});
+
+/**
  * Index
  */
 gulp.task('index', index);
@@ -138,7 +166,7 @@ gulp.task('assets', function () {
 /**
  * Dist
  */
-gulp.task('dist', ['vendors', 'assets', 'styles-dist', 'scripts-dist'], function () {
+gulp.task('dist', ['vendors', 'assets', 'styles-dist', 'scripts-dist', 'manifest-dist'], function () {
   return gulp.src('./src/app/index.html')
     .pipe(g.inject(gulp.src('./dist/vendors.min.{js,css}'), {ignorePath: 'dist', starttag: '<!-- inject:vendor:{{ext}} -->'}))
     .pipe(g.inject(gulp.src('./dist/' + bower.name + '.min.{js,css}'), {ignorePath: 'dist'}))
@@ -153,22 +181,6 @@ gulp.task('statics', g.serve({
   port: 3000,
   root: ['./.tmp', './.tmp/src/app', './src/app', './bower_components']
 }));
-
-/**
- * Cache
- */
-gulp.task('manifest', function () {
-  gulp.src(['.tmp/**'])
-    .pipe(manifest({
-      hash: true,
-      preferOnline: true,
-      network: ['*'],
-      filename: 'app.manifest',
-      basePath: '.tmp',
-      exclude: 'app.manifest'
-    }))
-    .pipe(gulp.dest('.tmp'));
-});
 
 /**
  * Watch
@@ -200,7 +212,7 @@ gulp.task('watch', ['statics', 'default'], function () {
 /**
  * Default task
  */
-gulp.task('default', ['lint', 'build-all']);
+gulp.task('default', ['lint', 'build-all', 'manifest']);
 
 /**
  * Lint everything
