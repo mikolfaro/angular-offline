@@ -132,7 +132,7 @@ gulp.task('manifest-dist', ['vendors', 'assets', 'styles-dist', 'scripts-dist'],
       preferOnline: true,
       network: ['*'],
       filename: 'app.manifest',
-      basePath: '.tmp',
+      basePath: 'dist',
       exclude: 'app.manifest'
     }))
     .pipe(gulp.dest('./dist'));
